@@ -12,34 +12,26 @@ export default function UpdateProfile() {
   const [loading, setLoading] = useState();
   const history = useHistory();
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (passwordRef.current.value !== passwordConfirmRef.current.value) {
       return setError("Passwords do not match");
     }
-
-    const promises = [];
-
-    setLoading(true);
-    setError("");
-
-    if (emailRef.current.value !== currentUser.email) {
-      promises.push(updateEmail(emailRef.current.value));
+    try {
+      setLoading(true);
+      setError("");
+      if (emailRef.current.value !== currentUser.email) {
+        await updateEmail(emailRef.current.value);
+      }
+      if (passwordRef.current.value) {
+        await updatePassword(passwordRef.current.value);
+      }
+      history.push("/");
+    } catch (err) {
+      setError("Failed to update account");
+    } finally {
+      setLoading(false);
     }
-    if (passwordRef.current.value) {
-      promises.push(updatePassword(passwordRef.current.value));
-    }
-
-    Promise.all(promises)
-      .then(() => {
-        history.push("/");
-      })
-      .catch(() => {
-        setError("Failed to update account");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
   }
 
   return (
